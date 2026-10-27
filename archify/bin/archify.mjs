@@ -7204,7 +7204,27 @@ async function commandValidate(args, invocation = {}) {
   if (exitCode !== 0) process.exitCode = exitCode;
 }
 
-const [command, ...args] = process.argv.slice(2);
+// --external-viewer <dir> applies to the commands that render a diagram. The
+// renderer reads it from the environment, so it also reaches child processes.
+function extractExternalViewerArgs(command, args) {
+  if (!['render', 'deliver', 'finalize', 'preview'].includes(command)) return args;
+  const rest = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '--external-viewer' || arg.startsWith('--external-viewer=')) {
+      const dir = arg === '--external-viewer' ? args[++index] : arg.slice('--external-viewer='.length);
+      if (!dir || dir.startsWith('--')) rejectCliArgument('--external-viewer requires a directory path.', {
+        code: 'cli/invalid-arguments', subject: { option: '--external-viewer' },
+        supportedFixes: ['provide one directory for the shared viewer files'],
+      });
+      process.env.ARCHIFY_EXTERNAL_VIEWER = path.resolve(dir);
+    } else rest.push(arg);
+  }
+  return rest;
+}
+
+const [command, ...rawCommandArgs] = process.argv.slice(2);
+const args = extractExternalViewerArgs(command, rawCommandArgs);
 // Reuse the canonical help metadata rather than a separate help registry.
 // Only the sole --help form bypasses command argument parsing and operations.
 const soleCommandHelp = args.length === 1 && args[0] === '--help'
