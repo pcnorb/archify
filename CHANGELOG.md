@@ -4,10 +4,6 @@ All notable changes are documented here. Format loosely follows [Keep a Changelo
 
 ## [Unreleased]
 
-### Added
-
-- **`--external-viewer <dir>` for `render`, `deliver`, `finalize` and `preview`.** Keeps the parts of a page that are the same for every diagram (viewer styles and fonts, viewer script, page markup, translation data, license notices) in content-hashed files in `<dir>`. Each page keeps only its own title, diagram and cards, and links to the shared files by a relative path, so pages at any depth work. Without the option the output is unchanged. A page that cannot be split exactly is written in the standard standalone form. A 400-diagram ERD sample went from about 33 MB to about 17 MB, and the shared files are written once.
-
 ## [3.2.0] — 2026-10-18
 
 ### Added

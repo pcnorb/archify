@@ -395,6 +395,21 @@ The delivery interface exposes four separate claims:
 
 Passing one claim never implies the others. Never claim that the deterministic receipt includes browser or perceptual review evidence.
 
+## External viewer files
+
+`render`, `deliver`, `finalize` and `preview` accept `--external-viewer <dir>`. A delivered page normally embeds the viewer: styles and fonts, the viewer script, the page markup, the translation data and the license notices. With this option those parts, which are the same for every diagram, are written once to content-hashed files in `<dir>`:
+
+- `archify-viewer.<hash>.css` and `archify-viewer.<hash>.js`: viewer styles and script.
+- `archify-shell.<hash>.js`: the page markup and translation data for one language and preset.
+- `archify-diagram.<hash>.css`: style rules a renderer puts inside the diagram, when there are any.
+- `archify-notices.<hash>.txt`: the license notices.
+
+A page then keeps its own head, title, diagram and cards, and links to the shared files by a relative path, so pages at different depths can share one directory. The shared files are written only when their content changes. A new Archify version writes new file names, so old pages keep working.
+
+The page is checked against a reference page rendered from the standard template. If it does not match exactly (for example when repository evidence is present), the standard standalone page is written. Without the option the output is unchanged.
+
+Serve these pages over HTTP or HTTPS. The viewer reads stylesheet rules when it exports SVG or an image, and Chrome blocks that for linked stylesheets on pages opened from disk (`file://`). The page itself displays correctly from disk.
+
 ## Recovering a failed comparison
 
 `compare` commits an HTML artifact and its JSON receipt as a pair. If that commit

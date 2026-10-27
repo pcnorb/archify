@@ -147,9 +147,24 @@ export function externalViewerHtml(template, args, outPath, assetsDir) {
   writeShared(shellFile, shell);
   writeShared(noticesFile, `${noticesText}\n`);
 
+  // Plain <style> blocks that the renderer puts inside the diagram (ERD cards)
+  // are rules for the whole document, so they move to a shared file as well.
+  const diagramCss = [];
+  values.svg = values.svg.replace(/<style>([\s\S]*?)<\/style>/g, (_match, rules) => { diagramCss.push(rules); return ''; });
+  let outPage = realPage;
+  if (diagramCss.length > 0) {
+    const diagramText = diagramCss.join('\n');
+    const diagramFile = path.join(assetsDir, `archify-diagram.${sha(diagramText)}.css`);
+    writeShared(diagramFile, diagramText);
+    const viewerLink = `<link rel="stylesheet" href="${hrefs[0]}">`;
+    if (!outPage.includes(viewerLink)) return null;
+    outPage = outPage.replace(viewerLink, () => `${viewerLink}\n<link rel="stylesheet" href="${relativeHref(outPath, diagramFile)}">`);
+  }
+
   const slots = [...new Set(names)]
     .map((name) => `<template id="archify-slot-${name}">${values[name]}</template>`)
     .join('\n');
   const page = `${slots}\n<script src="${relativeHref(outPath, shellFile)}"></script>\n`;
-  return realPage.slice(0, pb.start) + page + realPage.slice(pb.end);
+  const bounds = bodyBounds(outPage);
+  return outPage.slice(0, bounds.start) + page + outPage.slice(bounds.end);
 }

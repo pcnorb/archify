@@ -41,6 +41,11 @@ test('--external-viewer keeps the shared viewer parts in files beside the pages'
   assert.equal(assets.filter((name) => /^archify-viewer\..*\.css$/.test(name)).length, 1);
   assert.equal(assets.filter((name) => /^archify-viewer\..*\.js$/.test(name)).length, 1);
   assert.equal(assets.filter((name) => /^archify-notices\..*\.txt$/.test(name)).length, 1);
+  // The ERD renderer's in-diagram style block moves to a shared file too.
+  // One file for each distinct rule set (the ERD page and the workflow page differ).
+  assert.equal(assets.filter((name) => /^archify-diagram\..*\.css$/.test(name)).length, 2);
+  assert.doesNotMatch(page, /<style\b/);
+  assert.match(page, /<link rel="stylesheet" href="\.\.\/shared\/archify-diagram\.[0-9a-f]{10}\.css">/);
   // Page-specific markup stays in the page; the shell restores the rest.
   const slots = [...page.matchAll(/<template id="archify-slot-(\w+)">/g)].map((m) => m[1]);
   assert.ok(slots.includes('svg') && slots.includes('title'), slots.join(','));
