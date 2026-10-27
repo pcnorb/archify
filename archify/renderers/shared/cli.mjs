@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { applyTemplate, renderCards, esc } from './utils.mjs';
+import { externalViewerHtml } from './external-viewer.mjs';
 import { validateSchema } from './validator.mjs';
 import { verifyRepositoryEvidence } from './repository-evidence.mjs';
 import { installRendererDiagnosticBoundary, throwDiagnosticError, throwDiagnosticProblems, recordDiagnostic } from './diagnostics.mjs';
@@ -234,7 +235,7 @@ function stageRenderedHtml(outputPath, html, mode) {
 export function writeDiagram({ outPath, template, diagramType, meta, svg, cards, sourceEvidence = null }) {
   if (!START_TYPES.has(diagramType)) throw new Error(`writeDiagram: unknown diagram type ${JSON.stringify(diagramType)}`);
   const outputGuard = outputPathGuards.get(outPath);
-  const html = applyTemplate(template, {
+  const templateArgs = {
     title: meta.title,
     subtitle: meta.subtitle,
     svg,
@@ -242,7 +243,12 @@ export function writeDiagram({ outPath, template, diagramType, meta, svg, cards,
     locale: meta.locale,
     visualPreset: meta.visual_preset || 'classic',
     sourceEvidence,
-  });
+  };
+  // Opt-in: keep the shared viewer parts in files beside the pages. A page that
+  // cannot be split exactly is written in the standard standalone form.
+  const externalViewerDir = process.env.ARCHIFY_EXTERNAL_VIEWER;
+  const html = (externalViewerDir && externalViewerHtml(template, templateArgs, outPath, path.resolve(externalViewerDir)))
+    || applyTemplate(template, templateArgs);
   let candidatePath;
   let candidateIdentity;
   let candidateBinding;
