@@ -28,6 +28,7 @@ export const browserTestFiles = [
   'focus-browser.test.mjs',
   'crossover-state-browser.test.mjs',
   'semantic-passport-move-browser.test.mjs',
+  'semantic-passport-scroll-browser.test.mjs',
   'export-browser.test.mjs',
   'menu-modifier-browser.test.mjs',
   'export-selection-browser.test.mjs',
