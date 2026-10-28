@@ -247,7 +247,9 @@ export function writeDiagram({ outPath, template, diagramType, meta, svg, cards,
   // Opt-in: keep the shared viewer parts in files beside the pages. A page that
   // cannot be split exactly is written in the standard standalone form.
   const externalViewerDir = process.env.ARCHIFY_EXTERNAL_VIEWER;
-  const html = (externalViewerDir && externalViewerHtml(template, templateArgs, outPath, path.resolve(externalViewerDir)))
+  // deliver and finalize render in a staging folder; the shared files are linked from where the page ends up
+  const pageLocation = process.env.ARCHIFY_FINAL_OUTPUT || outPath;
+  const html = (externalViewerDir && externalViewerHtml(template, templateArgs, pageLocation, path.resolve(externalViewerDir)))
     || applyTemplate(template, templateArgs);
   let candidatePath;
   let candidateIdentity;

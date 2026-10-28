@@ -70,3 +70,15 @@ test('--external-viewer requires a directory', (t) => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /--external-viewer requires a directory path/);
 });
+
+test('finalize links the shared files from the delivered page, not from its staging folder', (t) => {
+  const dir = workspace(t);
+  const result = run(['finalize', 'erd', erd, 'pages/final.html', '--external-viewer', 'shared', '--json'], dir);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const page = fs.readFileSync(path.join(dir, 'pages/final.html'), 'utf8');
+  const links = [...page.matchAll(/(?:href|src)="([^"]*archify-[^"]+)"/g)].map((m) => m[1]);
+  assert.ok(links.length >= 3, links.join(', '));
+  for (const link of links) {
+    assert.ok(fs.existsSync(path.resolve(dir, 'pages', link)), `${link} does not resolve from the page`);
+  }
+});
