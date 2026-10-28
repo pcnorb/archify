@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="archify 3.1.1-dev.1">
+  <meta name="generator" content="archify 3.2.0">
   <meta name="archify-reader-contract" content="declared-wide-v1">
   <title>Sample Web App Diagram</title>
   <script>
@@ -1727,7 +1727,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       display: block;
       width: min(22rem, calc(100% - 13rem));
       max-width: calc(100% - 13rem);
-      overflow: hidden;
+      /* A small diagram has a short canvas. The panel scrolls inside it
+         instead of being cut off at the bottom of the canvas. */
+      max-height: calc(100% - 2rem);
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--frontend-stroke) transparent;
       border: 1px solid var(--frontend-stroke);
       border-radius: 0.85rem;
       background: var(--toolbar-menu-bg);
